@@ -1,6 +1,7 @@
 import os
 import argparse
 import logging
+import shutil
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 from auth import EpicAuth
@@ -82,6 +83,11 @@ def main():
         with open(file_path, 'wb') as f:
             f.write(replay_data)
         logger.info(f"完了: {file_path}")
+
+        # 正常に構築できた場合、キャッシュフォルダを削除
+        if os.path.exists(cache_dir):
+            shutil.rmtree(cache_dir)
+            logger.info(f"キャッシュを削除しました: {cache_dir}")
 
     except Exception as e:
         logger.exception(f"実行中に予期せぬエラーが発生しました: {e}")
