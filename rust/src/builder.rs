@@ -59,7 +59,7 @@ pub async fn build_replay(
 
     let match_id = meta.get("SessionId")
         .and_then(|v| v.as_str())
-        .ok_or("SessionId not found in metadata")?;
+        .ok_or("メタデータ内にSessionIdが見つかりません")?;
 
     // 2. ダウンロードリンクを取得
     let links = downloader
@@ -208,7 +208,7 @@ pub fn build_meta_binary(header: &Value) -> Result<Vec<u8>, String> {
     let ts = header.get("Timestamp").and_then(|v| v.as_str()).unwrap_or("");
     let ticks = if !ts.is_empty() {
         let dt = DateTime::parse_from_rfc3339(ts)
-            .map_err(|e| format!("Failed to parse timestamp {}: {}", ts, e))?;
+            .map_err(|e| format!("タイムスタンプのパースに失敗しました {}: {}", ts, e))?;
         (dt.timestamp_millis() * 10_000) + 621_355_968_000_000_000
     } else {
         0
