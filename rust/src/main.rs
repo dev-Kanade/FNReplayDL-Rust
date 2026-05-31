@@ -68,7 +68,7 @@ async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, 
     .await
     .map_err(|e| format!("リプレイファイルの構築に失敗しました: {}", e))?;
 
-    let filename = format!("{}.replay", params.match_id);
+    let filename = format!("{}.replay", match_id);
 
     let mut headers = header::HeaderMap::new();
     headers.insert(
