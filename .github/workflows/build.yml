@@ -20,15 +20,15 @@ jobs:
           - os_name: Linux-x86_64
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            bin_name: your_app_name
+            bin_name: fnreplaydl-for-rust
           - os_name: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
-            bin_name: your_app_name.exe
+            bin_name: fnreplaydl-for-rust.exe
           - os_name: macOS-x86_64
             os: macos-latest
             target: x86_64-apple-darwin
-            bin_name: your_app_name
+            bin_name: fnreplaydl-for-rust
 
     steps:
       - name: Checkout repository
