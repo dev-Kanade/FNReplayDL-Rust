@@ -17,7 +17,7 @@ FortniteのトーナメントリプレイファイルをAPI経由でダウンロ
 
 ```bash
 chmod +x ./fnreplaydl-debian
-./fnreplaydl
+./fnreplaydl-debian
 ```
 
 ### Windows
