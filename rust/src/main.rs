@@ -46,7 +46,7 @@ async fn main() {
 
 async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, String> {
     if params.match_id.trim().is_empty() {
-        return Err("match_id is required".to_string());
+        return Err("match_idが必要です。".to_string());
     }
 
     let auth = EpicAuth::new();
@@ -70,10 +70,15 @@ async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, 
     let filename = format!("{}.replay", params.match_id);
 
     let mut headers = header::HeaderMap::new();
-    headers.insert(header::CONTENT_TYPE, "application/octet-stream".parse().unwrap());
+    headers.insert(
+        header::CONTENT_TYPE,
+        "application/octet-stream".parse().unwrap(),
+    );
     headers.insert(
         header::CONTENT_DISPOSITION,
-        format!("attachment; filename=\"{}\"", filename).parse().unwrap(),
+        format!("attachment; filename=\"{}\"", filename)
+            .parse()
+            .unwrap(),
     );
     headers.insert(
         header::CONTENT_LENGTH,
