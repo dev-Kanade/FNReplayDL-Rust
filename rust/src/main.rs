@@ -35,15 +35,13 @@ async fn main() {
     let app = Router::new().route("/api", get(download_replay));
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
 
     println!("Fortnite Replay Downloader RustAPI が起動しました");
-    println!("   エンドポイント: http://{}:3000/api", addr.ip());
+    println!("   エンドポイント: http://localhost:3000/api");
     println!("   使用例: /api?match_id=xxxxxxxxxxxxxxx");
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, String> {
@@ -71,19 +69,16 @@ async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, 
 
     let filename = format!("{}.replay", params.match_id);
 
-    Ok((
-        [
-            (header::CONTENT_TYPE, "application/octet-stream"),
-            (
-                header::CONTENT_DISPOSITION,
-                &format!("attachment; filename=\"{}\"", filename),
-            ),
-            (
-                header::CONTENT_LENGTH,
-                replay_bytes.len().to_string().as_str(),
-            ),
-        ],
-        replay_bytes,
-    )
-        .into_response())
+    let mut headers = header::HeaderMap::new();
+    headers.insert(header::CONTENT_TYPE, "application/octet-stream".parse().unwrap());
+    headers.insert(
+        header::CONTENT_DISPOSITION,
+        format!("attachment; filename=\"{}\"", filename).parse().unwrap(),
+    );
+    headers.insert(
+        header::CONTENT_LENGTH,
+        replay_bytes.len().to_string().parse().unwrap(),
+    );
+
+    Ok((headers, replay_bytes).into_response())
 }
