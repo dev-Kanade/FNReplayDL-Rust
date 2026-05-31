@@ -1,4 +1,5 @@
-use reqwest::{Client, StatusCode};
+use crate::constants::{AUTH_CLIENT_ID, AUTH_CLIENT_SECRET, TOKEN_ENDPOINT, USER_AGENT};
+use reqwest::Client;
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -32,11 +33,11 @@ impl EpicAuth {
         }
 
         let mut headers = reqwest::header::HeaderMap::new();
-        headers.insert(
-            "Authorization",
-            token_guard.as_ref().unwrap().parse().unwrap(),
-        );
+        if let Some(token) = &*token_guard {
+            headers.insert("Authorization", token.parse().unwrap());
+        }
         headers.insert("User-Agent", USER_AGENT.parse().unwrap());
+
         Ok(headers)
     }
 
@@ -58,7 +59,7 @@ impl EpicAuth {
             .await
             .map_err(|e| e.to_string())?;
 
-        *token = Some(format!("{} {}", resp.token_type, resp.access_token));
+        **token = Some(format!("{} {}", resp.token_type, resp.access_token));
         Ok(())
     }
 }
