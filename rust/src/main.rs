@@ -20,7 +20,7 @@ use downloader::ReplayDownloader;
 
 #[derive(Deserialize)]
 struct ReplayQuery {
-    match_id: String,
+    match_id: Option<String>,
     checkpoint: Option<bool>,
     event: Option<bool>,
     no_data: Option<bool>,
@@ -45,15 +45,16 @@ async fn main() {
 }
 
 async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, String> {
-    if params.match_id.trim().is_empty() {
-        return Err("match_idが必要です。".to_string());
-    }
+    let match_id = match params.match_id {
+        Some(id) if !id.trim().is_empty() => id,
+        _ => return Err("マッチID（match_id）を指定してください。".to_string()),
+    };
 
     let auth = EpicAuth::new();
     let downloader = ReplayDownloader::new(auth);
 
     let metadata = downloader
-        .get_metadata(&params.match_id)
+        .get_metadata(&match_id)
         .await
         .map_err(|e| format!("メタデータの取得に失敗しました: {}", e))?;
 
