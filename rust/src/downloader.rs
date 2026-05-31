@@ -40,17 +40,17 @@ impl ReplayDownloader {
             .headers(headers)
             .send()
             .await
-            .map_err(|e| format!("Request failed: {}", e))?;
+            .map_err(|e| format!("メタデータ取得リクエストに失敗しました: {}", e))?;
 
         if resp.status() != StatusCode::OK {
             let status = resp.status();
             let body = resp.text().await.unwrap_or_default();
-            return Err(format!("Metadata fetch failed: {} - {}", status, body));
+            return Err(format!("メタデータの取得に失敗しました: HTTP {} - {}", status, body));
         }
 
         resp.json()
             .await
-            .map_err(|e| format!("JSON parse error: {}", e))
+            .map_err(|e| format!("JSONのパースに失敗しました: {}", e))
     }
 
     pub async fn get_download_links(
@@ -106,16 +106,16 @@ impl ReplayDownloader {
             .headers(headers)
             .send()
             .await
-            .map_err(|e| format!("ダウンロード失敗 {}: {}", file_id, e))?;
+            .map_err(|e| format!("チャンク {} のダウンロード中にエラーが発生しました: {}", file_id, e))?;
 
         if resp.status() != StatusCode::OK {
-            return Err(format!("HTTP {} for chunk {}", resp.status(), file_id));
+            return Err(format!("チャンク {} の取得でHTTPエラーが発生しました: HTTP {}", file_id, resp.status()));
         }
 
         let bytes = resp
             .bytes()
             .await
-            .map_err(|e| format!("ダウンロード失敗 {}: {}", file_id, e))?;
+            .map_err(|e| format!("チャンク {} のダウンロード中にエラーが発生しました: {}", file_id, e))?;
 
         info!("ダウンロード完了 {}: {} bytes", file_id, bytes.len());
         Ok(bytes)
