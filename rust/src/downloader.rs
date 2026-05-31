@@ -4,6 +4,7 @@ use bytes::Bytes;
 use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::sync::Arc;
 use tracing::{error, info, warn};
 
 #[derive(Clone)]
@@ -74,17 +75,17 @@ impl ReplayDownloader {
             .json(&payload)
             .send()
             .await
-            .map_err(|e| format!("認証エラー: {}", e))?;
+            .map_err(|e| format!("リクエストエラー: {}", e))?;
 
         if resp.status() != StatusCode::OK {
-            return Err(format!("認証エラー: {}", resp.status()));
+            return Err(format!("ダウンロードリンク取得エラー: HTTP {}", resp.status()));
         }
 
         let data: Value = resp.json().await.map_err(|e| e.to_string())?;
 
         let files = data["files"]
             .as_object()
-            .ok_or("認証エラー: 'files' not found")?
+            .ok_or("レスポンス解析エラー: 'files' が見つかりません")?
             .clone();
 
         Ok(files.into_iter().map(|(k, v)| (k, v)).collect())
@@ -95,7 +96,7 @@ impl ReplayDownloader {
             .auth
             .get_headers()
             .await
-            .map_err(|e| format!("認証エラー: {}", e))?;
+            .map_err(|e| format!("ヘッダー取得エラー: {}", e))?;
 
         info!("ダウンロード中: {} (ID: {})", url, file_id);
 
@@ -128,9 +129,9 @@ impl ReplayDownloader {
         let semaphore = Arc::new(tokio::sync::Semaphore::new(8));
 
         for (filename, info) in links {
-            let url = info["link"]
+            let url = info["readLink"]
                 .as_str()
-                .ok_or("認証エラー: 'link' not found")?
+                .ok_or("ダウンロードリンク取得エラー: 'readLink' がありません")?
                 .to_string();
 
             let file_id = filename.clone();
@@ -159,7 +160,7 @@ impl ReplayDownloader {
                     results.insert(id, data);
                 }
                 Ok(Err(e)) => return Err(e),
-                Err(e) => return Err(format!("ダウンロード失敗 {}: {}", file_id, e)),
+                Err(e) => return Err(format!("タスクJoin失敗: {}", e)),
             }
         }
 
