@@ -55,7 +55,7 @@ async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, 
     let metadata = downloader
         .get_metadata(&params.match_id)
         .await
-        .map_err(|e| format!("Failed to get metadata: {}", e))?;
+        .map_err(|e| format!("メタデータの取得に失敗しました: {}", e))?;
 
     let replay_bytes = builder::build_replay(
         &metadata,
@@ -65,7 +65,7 @@ async fn download_replay(Query(params): Query<ReplayQuery>) -> Result<Response, 
         params.no_data.unwrap_or(false),
     )
     .await
-    .map_err(|e| format!("Failed to build replay: {}", e))?;
+    .map_err(|e| format!("リプレイファイルの構築に失敗しました: {}", e))?;
 
     let filename = format!("{}.replay", params.match_id);
 
