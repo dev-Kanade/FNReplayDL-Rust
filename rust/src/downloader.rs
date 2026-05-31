@@ -5,3 +5,9 @@ use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::collections::HashMap;
 use tracing::{error, info, warn};
+
+#[derive(Clone)]
+pub struct ReplayDownloader {
+    auth: EpicAuth,
+    client: Client,
+}
